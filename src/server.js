@@ -8,7 +8,6 @@ require('./config/db');
 
 const app = express();
 
-
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "https://ptu-nexus.vercel.app");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
@@ -16,17 +15,15 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Credentials", "true");
 
   if (req.method === "OPTIONS") {
-    return res.sendStatus(200); // 🔥 STOP HERE (fixes your issue)
+    return res.sendStatus(200);
   }
 
   next();
 });
 
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Single static files route (fixed duplicate)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
@@ -45,6 +42,30 @@ app.use('/api/doubts', doubtRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/question-papers', questionPaperRoutes);
 app.use('/api/files', fileRoutes);
+
+// ✅ ADD DATABASE TEST ROUTE HERE
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const db = require('./config/db');
+    const [result] = await db.query('SELECT 1 + 1 as result');
+    const [tables] = await db.query('SHOW TABLES');
+    const [users] = await db.query('SELECT COUNT(*) as count FROM users');
+    
+    res.json({ 
+      success: true, 
+      message: 'Database connected!',
+      math: result[0].result,
+      totalTables: tables.length,
+      totalUsers: users[0].count
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: error.message,
+      error: error.code
+    });
+  }
+});
 
 app.get('/', (req, res) => {
   res.json({ success: true, message: 'PTU Nexus API is running! 🚀' });
