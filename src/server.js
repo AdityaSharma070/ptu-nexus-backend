@@ -8,14 +8,15 @@ require('./config/db');
 
 const app = express();
 
-// ✅ CORS — allows both local dev and production frontend
+
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    process.env.FRONTEND_URL || 'https://ptu-nexus-frontend.vercel.app'
+    'https://ptu-nexus.vercel.app'  
   ],
   credentials: true
 }));
+app.options('*', cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
